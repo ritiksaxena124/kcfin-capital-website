@@ -37,7 +37,7 @@ const formSchema = z
   .object({
     businessName: z
       .string()
-      .min(2, { message: "Business Name must be at least 2 characters" }),
+      .min(2, "Business Name must be at least 2 characters"),
     gstNumber: z.string().optional(),
     businessType: z.string().min(1, "Please select business type"),
     monthlyTurnover: z.string().optional(),
@@ -70,8 +70,14 @@ export const GSTTurnoverCalculator = () => {
   const [results, setResults] = useState<Results | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const form = useForm<FormValues>({
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+    mode: "onBlur",
     defaultValues: {
       businessName: "",
       gstNumber: "",
@@ -165,25 +171,37 @@ export const GSTTurnoverCalculator = () => {
       <Card>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* FORM */}
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Business Name */}
             <div className="space-y-2">
-              <Label>Business Name</Label>
-              <Input {...form.register("businessName")} />
-              <p className="text-sm text-red-500">
-                {form.formState.errors.businessName?.message}
-              </p>
+              <Label className={errors.businessName ? "text-red-500" : ""}>
+                Business Name
+              </Label>
+              <Input
+                {...register("businessName")}
+                className={errors.businessName ? "border-red-500" : ""}
+              />
+              {errors.businessName && (
+                <p className="text-sm text-red-500">
+                  {errors.businessName.message}
+                </p>
+              )}
             </div>
 
+            {/* GST */}
             <div className="space-y-2">
               <Label>GST Number (Optional)</Label>
-              <Input {...form.register("gstNumber")} />
+              <Input {...register("gstNumber")} />
             </div>
 
+            {/* Business Type */}
             <div className="space-y-2">
-              <Label>Business Type</Label>
+              <Label className={errors.businessType ? "text-red-500" : ""}>
+                Business Type
+              </Label>
               <Controller
                 name="businessType"
-                control={form.control}
+                control={control}
                 render={({ field }) => (
                   <BusinessTypeDropdown
                     options={businessTypes}
@@ -193,20 +211,38 @@ export const GSTTurnoverCalculator = () => {
                   />
                 )}
               />
-              <p className="text-sm text-red-500">
-                {form.formState.errors.businessType?.message}
-              </p>
+              {errors.businessType && (
+                <p className="text-sm text-red-500">
+                  {errors.businessType.message}
+                </p>
+              )}
             </div>
 
+            {/* Turnover */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Monthly Turnover (₹)</Label>
-                <Input {...form.register("monthlyTurnover")} />
+                <Label className={errors.monthlyTurnover ? "text-red-500" : ""}>
+                  Monthly Turnover (₹)
+                </Label>
+                <Input
+                  {...register("monthlyTurnover")}
+                  className={errors.monthlyTurnover ? "border-red-500" : ""}
+                />
+                {errors.monthlyTurnover && (
+                  <p className="text-sm text-red-500">
+                    {errors.monthlyTurnover.message}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
-                <Label>Annual Turnover (₹)</Label>
-                <Input {...form.register("annualTurnover")} />
+                <Label className={errors.monthlyTurnover ? "text-red-500" : ""}>
+                  Annual Turnover (₹)
+                </Label>
+                <Input
+                  {...register("annualTurnover")}
+                  className={errors.monthlyTurnover ? "border-red-500" : ""}
+                />
               </div>
             </div>
 

@@ -3,6 +3,7 @@ import { ExpertConsultation } from "./components/expert-consultation";
 import { Footer } from "./components/footer";
 import { GSTTurnoverCalculator } from "./components/gst-turnover-calculator";
 import { HeroSection } from "./components/hero-section";
+import TrustIndicators from "./components/trust-indicators";
 import { WhyChooseUs } from "./components/why-choose-us";
 
 export const HomePage = () => {
@@ -23,6 +24,7 @@ export const HomePage = () => {
           <HeroSection />
           <WhyChooseUs />
           <EligibilityChecker />
+          <TrustIndicators />
           <GSTTurnoverCalculator />
           <ExpertConsultation />
         </main>

@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Phone, PhoneIcon } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Phone, PhoneIcon } from "lucide-react";
-import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
+
 import { BusinessTypeDropdown } from "./business-type-dropdown";
 import { WhatHappenNext } from "./what-happen-next";
 
@@ -49,11 +51,11 @@ const annualTurnoverRange = [
 const formSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
   phoneNumber: z.string().min(10, "Valid phone number required"),
-  email: z.string().email("Invalid email"),
-  businessType: z.string().min(1),
-  turnoverRange: z.string().min(1),
-  loanAmount: z.string().min(1),
-  preferredCallTime: z.string().min(1),
+  email: z.string().email("Invalid email address"),
+  businessType: z.string().min(1, "Please select business type"),
+  turnoverRange: z.string().min(1, "Please select turnover range"),
+  loanAmount: z.string().min(1, "Please enter loan amount"),
+  preferredCallTime: z.string().min(1, "Please select preferred call time"),
   message: z.string().optional(),
 });
 
@@ -67,8 +69,15 @@ export const ExpertConsultation = () => {
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<FormValues>({
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+    mode: "onBlur",
     defaultValues: {
       fullName: "",
       phoneNumber: "",
@@ -94,7 +103,7 @@ export const ExpertConsultation = () => {
       if (!res.ok) throw new Error("Submission failed");
 
       setSubmitted(true);
-      form.reset();
+      reset();
     } catch (err) {
       console.error(err);
       alert("Failed to submit form. Please try again.");
@@ -109,7 +118,7 @@ export const ExpertConsultation = () => {
 
   if (submitted) {
     return (
-      <section className="bg-gradient-to-br from-[#16B364] to-[#22C55E] rounded-2xl p-8 text-white text-center">
+      <Card className="bg-gradient-to-br from-[#16B364] to-[#22C55E] rounded-2xl p-8 text-white text-center mb-12">
         <div className="py-12 space-y-6">
           <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto">
             <Phone className="w-8 h-8" />
@@ -123,15 +132,11 @@ export const ExpertConsultation = () => {
             Our financial expert will call you within 24 hours.
           </p>
 
-          <Button
-            variant="secondary"
-            onClick={() => setSubmitted(false)}
-            className="mt-6"
-          >
+          <Button variant="secondary" onClick={() => setSubmitted(false)}>
             Submit Another Request
           </Button>
         </div>
-      </section>
+      </Card>
     );
   }
 
@@ -152,23 +157,44 @@ export const ExpertConsultation = () => {
 
       <Card>
         <CardContent className="pt-6">
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Field label="Full Name">
-                <Input {...form.register("fullName")} />
+              <Field label="Full Name" error={errors.fullName?.message}>
+                <Input
+                  {...register("fullName")}
+                  className={
+                    errors.fullName
+                      ? "border-red-500 focus-visible:ring-red-500"
+                      : ""
+                  }
+                />
               </Field>
 
-              <Field label="Phone Number">
-                <Input {...form.register("phoneNumber")} />
+              <Field label="Phone Number" error={errors.phoneNumber?.message}>
+                <Input
+                  {...register("phoneNumber")}
+                  className={
+                    errors.phoneNumber
+                      ? "border-red-500 focus-visible:ring-red-500"
+                      : ""
+                  }
+                />
               </Field>
 
-              <Field label="Email Address">
-                <Input {...form.register("email")} />
+              <Field label="Email Address" error={errors.email?.message}>
+                <Input
+                  {...register("email")}
+                  className={
+                    errors.email
+                      ? "border-red-500 focus-visible:ring-red-500"
+                      : ""
+                  }
+                />
               </Field>
 
-              <Field label="Business Type">
+              <Field label="Business Type" error={errors.businessType?.message}>
                 <Controller
-                  control={form.control}
+                  control={control}
                   name="businessType"
                   render={({ field }) => (
                     <BusinessTypeDropdown
@@ -180,9 +206,12 @@ export const ExpertConsultation = () => {
                 />
               </Field>
 
-              <Field label="Annual Turnover Range">
+              <Field
+                label="Annual Turnover Range"
+                error={errors.turnoverRange?.message}
+              >
                 <Controller
-                  control={form.control}
+                  control={control}
                   name="turnoverRange"
                   render={({ field }) => (
                     <BusinessTypeDropdown
@@ -194,13 +223,26 @@ export const ExpertConsultation = () => {
                 />
               </Field>
 
-              <Field label="Required Loan Amount (₹)">
-                <Input {...form.register("loanAmount")} />
+              <Field
+                label="Required Loan Amount (₹)"
+                error={errors.loanAmount?.message}
+              >
+                <Input
+                  {...register("loanAmount")}
+                  className={
+                    errors.loanAmount
+                      ? "border-red-500 focus-visible:ring-red-500"
+                      : ""
+                  }
+                />
               </Field>
 
-              <Field label="Preferred Call Time">
+              <Field
+                label="Preferred Call Time"
+                error={errors.preferredCallTime?.message}
+              >
                 <Controller
-                  control={form.control}
+                  control={control}
                   name="preferredCallTime"
                   render={({ field }) => (
                     <BusinessTypeDropdown
@@ -212,9 +254,9 @@ export const ExpertConsultation = () => {
                 />
               </Field>
 
-              <div className="md:col-span-2">
+              <div className="md:col-span-2 space-y-1">
                 <Label>Additional Message (Optional)</Label>
-                <Textarea {...form.register("message")} />
+                <Textarea {...register("message")} />
               </div>
             </div>
 
@@ -225,7 +267,8 @@ export const ExpertConsultation = () => {
                 "Submitting..."
               ) : (
                 <>
-                  <PhoneIcon /> Request Expert Callback
+                  <PhoneIcon className="mr-2" />
+                  Request Expert Callback
                 </>
               )}
             </Button>
@@ -242,18 +285,21 @@ export const ExpertConsultation = () => {
 };
 
 /* ---------------------------------- */
-/* Helper                              */
+/* Field Helper                        */
 /* ---------------------------------- */
 
 const Field = ({
   label,
+  error,
   children,
 }: {
   label: string;
+  error?: string;
   children: React.ReactNode;
 }) => (
-  <div className="space-y-2">
-    <Label>{label}</Label>
+  <div className="space-y-1">
+    <Label className={error ? "text-red-600" : ""}>{label}</Label>
     {children}
+    {error && <p className="text-xs text-red-600">{error}</p>}
   </div>
 );
