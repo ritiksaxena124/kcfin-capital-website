@@ -26,7 +26,6 @@ export const HomePage = () => {
           <GSTTurnoverCalculator />
           <ExpertConsultation />
         </main>
-        <Footer />
       </div>
     </div>
   );
